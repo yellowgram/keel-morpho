@@ -1,0 +1,34 @@
+{
+  "iso": "2026-09-22T12:19:42Z",
+  "mandate_hash": "aef34504f37abc904cadc1678c376221e027e916a94f9786605b238ff0c08855",
+  "weth_markets": 97,
+  "count_total": 97,
+  "wsteth_markets": 5,
+  "lltv_eligible": 0,
+  "ineligible_n": 5,
+  "scored": [],
+  "pass_n": 0,
+  "warn_n": 0,
+  "exit_n": 0,
+  "llama": {
+    "secondary_wsteth_weth": 1.2460211349172372,
+    "ts": 1790079460,
+    "wst_usd": 3412.9419395017267,
+    "weth_usd": 2739.0722708153903
+  },
+  "halt": [],
+  "graphql_ok": true,
+  "llama_ok": true,
+  "rpc_ok": false,
+  "data_age_s_max": 0,
+  "confidence": "HIGH",
+  "recommendation": "IDLE_ALL",
+  "drill": {
+    "label": "DRILL",
+    "procedure": "P_WSTETH",
+    "paper_apply": "If wst_dev EXIT: freeze new; EXIT open allocations; IDLE until O4 PASS",
+    "book_effect": "REFERENCE 100 \u2192 IDLE_ALL (already idle)",
+    "result": "PASS_DRILL \u2014 no allocated rows; idle unchanged"
+  },
+  "status": "GREEN"
+}

@@ -1,0 +1,185 @@
+{
+  "iso": "2026-09-26T13:20:14Z",
+  "ny_label": "2026-09-26 09:20 EDT",
+  "mandate_hash": "aef34504f37abc904cadc1678c376221e027e916a94f9786605b238ff0c08855",
+  "demo_only": true,
+  "kill": false,
+  "five_way": "ALLOW=N \u2229 PASS=N \u2229 VAULT=N \u2229 NOT_DEMO=N \u2229 NOT_KILL=Y | failed=['ALLOW', 'PASS', 'VAULT', 'NOT_DEMO']",
+  "drill": "SKIP_IDLE",
+  "quiet_if_IDLE": false,
+  "missed_observe": "none",
+  "weth_markets": 97,
+  "count_total": 97,
+  "wsteth_markets": 5,
+  "eligible": 0,
+  "ineligible": [
+    {
+      "marketId": "0xb8fc70e82bc5bb53e773626fcc6a23f7eefa036918d7ef216ecfb1950a94a85e",
+      "lltv": 965000000000000000,
+      "lltv_pct": 96.5,
+      "reason": "lltv>860000000000000000 (Regime B max 86%); forbidden_lltv_bucket"
+    },
+    {
+      "marketId": "0xd0e50cdac92fe2172043f5e0c36532c6369d24947e40968f34a5e8819ca9ec5d",
+      "lltv": 945000000000000000,
+      "lltv_pct": 94.5,
+      "reason": "lltv>860000000000000000 (Regime B max 86%); forbidden_lltv_bucket"
+    },
+    {
+      "marketId": "0xc54d7acf14de29e0e5527cabd7a576506870346a78a11a6762e2cca66322ec41",
+      "lltv": 945000000000000000,
+      "lltv_pct": 94.5,
+      "reason": "lltv>860000000000000000 (Regime B max 86%); forbidden_lltv_bucket"
+    },
+    {
+      "marketId": "0x04951431341b022886954b9d99310ac2f738eb69fe5b4408042f0b505c9ef302",
+      "lltv": 945000000000000000,
+      "lltv_pct": 94.5,
+      "reason": "lltv>860000000000000000 (Regime B max 86%); forbidden_lltv_bucket"
+    },
+    {
+      "marketId": "0x27dc2546042d49c948772a38432849a60fdb41f26af32fac42336f2278591296",
+      "lltv": 965000000000000000,
+      "lltv_pct": 96.5,
+      "reason": "lltv>860000000000000000 (Regime B max 86%); forbidden_lltv_bucket"
+    }
+  ],
+  "allow_accepted": 0,
+  "allow_rejected": [],
+  "table_rows": [
+    {
+      "marketId": "0xb8fc70e82bc5bb53e773626fcc6a23f7eefa036918d7ef216ecfb1950a94a85e",
+      "lltv": 965000000000000000,
+      "lltv_pct": 96.5,
+      "eligible": false,
+      "ineligible_reason": "lltv>860000000000000000 (Regime B max 86%); forbidden_lltv_bucket",
+      "util": 0.9039409205151966,
+      "supplyApy": 0.01948910308584527,
+      "supplyUsd": 96541412.73729645,
+      "oracle": "0xbD60A6770b27E084E8617335ddE769241B0e71D8",
+      "o_flags": [
+        "O2_WARN",
+        "O1_PARTIAL",
+        "O3_PARTIAL",
+        "O4_PARTIAL",
+        "O5_N/A",
+        "O6_PASS(age=879s)",
+        "O7_N/A"
+      ],
+      "top_borrower_pct": null
+    },
+    {
+      "marketId": "0xd0e50cdac92fe2172043f5e0c36532c6369d24947e40968f34a5e8819ca9ec5d",
+      "lltv": 945000000000000000,
+      "lltv_pct": 94.5,
+      "eligible": false,
+      "ineligible_reason": "lltv>860000000000000000 (Regime B max 86%); forbidden_lltv_bucket",
+      "util": 0.8919686676475709,
+      "supplyApy": 0.016292077187863997,
+      "supplyUsd": 32962956.144654416,
+      "oracle": "0xbD60A6770b27E084E8617335ddE769241B0e71D8",
+      "o_flags": [
+        "O2_WARN",
+        "O1_PARTIAL",
+        "O3_PARTIAL",
+        "O4_PARTIAL",
+        "O5_N/A",
+        "O6_PASS(age=867s)",
+        "O7_N/A"
+      ],
+      "top_borrower_pct": null
+    },
+    {
+      "marketId": "0xc54d7acf14de29e0e5527cabd7a576506870346a78a11a6762e2cca66322ec41",
+      "lltv": 945000000000000000,
+      "lltv_pct": 94.5,
+      "eligible": false,
+      "ineligible_reason": "lltv>860000000000000000 (Regime B max 86%); forbidden_lltv_bucket",
+      "util": 0.8970493277081413,
+      "supplyApy": 0.016453825205456716,
+      "supplyUsd": 42131.023608265765,
+      "oracle": "0x2a01EB9496094dA03c4E364Def50f5aD1280AD72",
+      "o_flags": [
+        "O2_WARN",
+        "O1_PARTIAL",
+        "O3_PARTIAL",
+        "O4_PARTIAL",
+        "O5_N/A",
+        "O6_PASS(age=879s)",
+        "O7_N/A"
+      ],
+      "top_borrower_pct": null
+    },
+    {
+      "marketId": "0x04951431341b022886954b9d99310ac2f738eb69fe5b4408042f0b505c9ef302",
+      "lltv": 945000000000000000,
+      "lltv_pct": 94.5,
+      "eligible": false,
+      "ineligible_reason": "lltv>860000000000000000 (Regime B max 86%); forbidden_lltv_bucket",
+      "util": 0.856731490665731,
+      "supplyApy": 0.01335788020116931,
+      "supplyUsd": 5.439952079141782,
+      "oracle": "0xcBd5323D71a3424A7e0Fd11c367565bad3838867",
+      "o_flags": [
+        "O2_WARN",
+        "O1_PARTIAL",
+        "O3_PARTIAL",
+        "O4_PARTIAL",
+        "O5_N/A",
+        "O6_FAIL(age=915s>900)",
+        "O7_N/A"
+      ],
+      "top_borrower_pct": null
+    },
+    {
+      "marketId": "0x27dc2546042d49c948772a38432849a60fdb41f26af32fac42336f2278591296",
+      "lltv": 965000000000000000,
+      "lltv_pct": 96.5,
+      "eligible": false,
+      "ineligible_reason": "lltv>860000000000000000 (Regime B max 86%); forbidden_lltv_bucket",
+      "util": 0.0,
+      "supplyApy": 0,
+      "supplyUsd": 0,
+      "oracle": "0x3A7bB36Ee3f3eE32A60e9f2b33c1e5f2E83ad766",
+      "o_flags": [
+        "O2_PASS",
+        "O1_PARTIAL",
+        "O3_PARTIAL",
+        "O4_PARTIAL",
+        "O5_N/A",
+        "O6_FAIL(age=915s>900)",
+        "O7_N/A"
+      ],
+      "top_borrower_pct": null
+    }
+  ],
+  "llama": {
+    "weth_usd": 2686.3241478392224,
+    "wsteth_usd": 3345.628711553848,
+    "steth_usd": 2687.171115367994,
+    "wsteth_weth": 1.245430010464279,
+    "steth_weth": 1.0003152886554858,
+    "ts": 1790428720
+  },
+  "rpc": {
+    "stEthPerToken": null,
+    "block": null,
+    "provider": null
+  },
+  "graphql_ok": true,
+  "llama_ok": true,
+  "rpc_ok": false,
+  "fetch_errors": [
+    "rpc:HTTP Error 403: Forbidden"
+  ],
+  "recommendation": "IDLE_ALL",
+  "status": "AMBER",
+  "all_items_sample_keys": [
+    "marketId",
+    "lltv",
+    "oracle",
+    "loanAsset",
+    "collateralAsset",
+    "state"
+  ]
+}
