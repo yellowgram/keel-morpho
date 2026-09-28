@@ -1,5 +1,7 @@
 # Keel
 
+More from yellowgram: [OSS tools](https://www.yellowgram.dev/oss).
+
 **Self-run OSS toolkit** for a single operator: Morpho V1 **Regime B** observe → score → recommend → REFERENCE_ONLY draft for a wstETH–WETH credit sleeve.
 
 It is **not** a custodian, multi-user vault, yield optimizer, Soft-WTP product, consulting kit, or auto-signer.
