@@ -97,4 +97,12 @@ Multi-user vault · Soft-WTP · kits/invoice outreach · auto-sign/auto-ALLOW/ag
 
 [MIT](LICENSE). **No warranty.** Protocol risk + operator paste quality can mean total loss. You alone sign.
 
+### Disclaimer (capital / custody)
+
+Keel is an observe–score–recommend toolkit. It does not custody funds, hold private keys, auto-sign transactions, or operate a multi-user vault. You alone paste ALLOW/ACTION and sign any on-chain action. Protocol risk and operator error can cause total loss of capital.
+
 Founder-private book state (if any) lives under `private/` and is gitignored — not part of the public toolkit narrative.
+
+---
+
+Part of yellowgram open source tools: https://www.yellowgram.dev/oss

@@ -19,8 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
-DISCLAIMER (capital / custody): Keel is an observe–score–recommend toolkit.
-It does not custody funds, hold private keys, auto-sign transactions, or
-operate a multi-user vault. You alone paste ALLOW/ACTION and sign any on-chain
-action. Protocol risk and operator error can cause total loss of capital.
