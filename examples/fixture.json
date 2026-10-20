@@ -1,0 +1,109 @@
+{
+  "_note": "Illustrative snapshot for the offline demo and tests. Market ids and oracles are made up; token addresses are the real WETH and wstETH. captured_at is used as the clock unless --now is given.",
+  "captured_at": "2026-10-19T14:00:00Z",
+  "markets": [
+    {
+      "marketId": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "lltv": "860000000000000000",
+      "oracle": {
+        "address": "0xa1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1"
+      },
+      "loanAsset": {
+        "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+        "symbol": "WETH",
+        "decimals": 18
+      },
+      "collateralAsset": {
+        "address": "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0",
+        "symbol": "wstETH",
+        "decimals": 18
+      },
+      "state": {
+        "utilization": 0.62,
+        "borrowAssets": "7440000000000000000000",
+        "supplyAssets": "12000000000000000000000",
+        "liquidityAssets": "4560000000000000000000",
+        "supplyAssetsUsd": 28700000,
+        "supplyApy": 0.021,
+        "timestamp": 1792418340
+      }
+    },
+    {
+      "marketId": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "lltv": "860000000000000000",
+      "oracle": {
+        "address": "0xb1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1"
+      },
+      "loanAsset": {
+        "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+        "symbol": "WETH",
+        "decimals": 18
+      },
+      "collateralAsset": {
+        "address": "0xdededededededededededededededededededede",
+        "symbol": "wstETH",
+        "decimals": 18
+      },
+      "state": {
+        "utilization": 0.4,
+        "borrowAssets": "1200000000000000000000",
+        "supplyAssets": "3000000000000000000000",
+        "liquidityAssets": "1800000000000000000000",
+        "supplyAssetsUsd": 7100000,
+        "supplyApy": 0.035,
+        "timestamp": 1792418340
+      }
+    },
+    {
+      "marketId": "0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "lltv": "945000000000000000",
+      "oracle": {
+        "address": "0xc1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1"
+      },
+      "loanAsset": {
+        "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+        "symbol": "WETH",
+        "decimals": 18
+      },
+      "collateralAsset": {
+        "address": "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0",
+        "symbol": "wstETH",
+        "decimals": 18
+      },
+      "state": {
+        "utilization": 0.88,
+        "borrowAssets": "35200000000000000000000",
+        "supplyAssets": "40000000000000000000000",
+        "liquidityAssets": "4800000000000000000000",
+        "supplyAssetsUsd": 95800000,
+        "supplyApy": 0.016,
+        "timestamp": 1792418340
+      }
+    }
+  ],
+  "top_borrower_assets": {
+    "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": "520000000000000000000",
+    "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb": "100000000000000000000",
+    "0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc": "9000000000000000000000"
+  },
+  "prices": {
+    "WSTETH": {
+      "usd": 2982.18,
+      "ts": 1792418100
+    },
+    "VAULT_ASSET": {
+      "usd": 2395.12,
+      "ts": 1792418280
+    },
+    "STETH": {
+      "usd": 2391.31,
+      "ts": 1792418100
+    }
+  },
+  "steth_per_wsteth": 1.246696,
+  "oracle_prices": {
+    "0xa1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1": 1.2467,
+    "0xb1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1b1": 1.2467,
+    "0xc1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1c1": 1.2465
+  }
+}
