@@ -92,6 +92,37 @@ class MissingDataIsNotPass(unittest.TestCase):
         self.assertFalse(checks.market_ready(True, cs))
 
 
+    # Round 3 P3: borrow above supply passed every check; '²' crashed the run.
+    def test_borrow_above_supply_is_unknown(self):
+        m = market("a"); m["state"]["borrowAssets"] = str(10**30); m["state"]["supplyAssets"] = str(10**24)
+        r = by(run_market(m))
+        self.assertEqual(r["top_borrower"], "UNKNOWN")
+        self.assertEqual(r["exit_liquidity"], "UNKNOWN")
+        self.assertFalse(checks.market_ready(True, run_market(m)))
+
+    def test_top_position_above_market_borrow_is_unknown(self):
+        m = market("a")
+        borrow = int(m["state"]["borrowAssets"])
+        self.assertEqual(by(run_market(m, top_borrower_assets=borrow + 1))["top_borrower"], "UNKNOWN")
+        self.assertNotEqual(by(run_market(m, top_borrower_assets=borrow))["top_borrower"], "UNKNOWN")
+
+    def test_non_ascii_or_padded_digits_are_unknown_not_a_crash(self):
+        for bad in ("\u00b2", "\u0661\u0662", "5 ", " 5", "1e3", "1.5", "+5", 1.5):
+            for key, check in (("borrowAssets", "top_borrower"), ("supplyAssets", "exit_liquidity"), ("liquidityAssets", "exit_liquidity")):
+                m = market("a"); m["state"][key] = bad
+                self.assertEqual(by(run_market(m))[check], "UNKNOWN", (key, bad))
+        self.assertEqual(checks._nonneg_int("123"), 123)
+        self.assertEqual(checks._nonneg_int(4.0), 4)
+
+    def test_top_borrower_source_rejects_non_ascii_digits(self):
+        s = sources.LiveSources.__new__(sources.LiveSources)
+        s.cfg = {"CHAIN_ID": 1}
+        with mock.patch.object(type(s), "_gql", return_value=({"marketPositions": {"items": [{"state": {"borrowAssets": "\u00b2"}}]}}, None)):
+            self.assertEqual(s.top_borrower_assets("0x" + "a" * 64), (None, "top borrower borrowAssets invalid"))
+        with mock.patch.object(type(s), "_gql", return_value=({"marketPositions": {"items": [{"state": {"borrowAssets": "42"}}]}}, None)):
+            self.assertEqual(s.top_borrower_assets("0x" + "a" * 64), (42, None))
+
+
 class ConfigAndAllowlist(unittest.TestCase):
     def test_nan_cap_rel_is_rejected(self):
         for bad in ("nan", "inf", "-0.1", "0"):

@@ -88,8 +88,9 @@ def _nonneg_int(v) -> int | None:
         return v if v >= 0 else None
     if isinstance(v, float):
         return int(v) if math.isfinite(v) and v >= 0 and v == int(v) else None
-    if isinstance(v, str) and v.strip().isdigit():
-        return int(v.strip())
+    # ASCII digits only. str.isdigit() also accepts '²' (int() then raises) and other scripts' digits.
+    if isinstance(v, str) and re.fullmatch(r"[0-9]+", v):
+        return int(v)
     return None
 
 
@@ -101,8 +102,12 @@ def run_checks(market: dict, cfg: dict, *, top_borrower_assets: int | None,
     out: list[Check] = []
 
     borrow = _nonneg_int(st.get("borrowAssets"))
+    supply = _nonneg_int(st.get("supplyAssets"))
     if borrow is None:
         out.append(Check("top_borrower", UNKNOWN, "borrowAssets missing or invalid"))
+    elif supply is not None and borrow > supply:
+        # Impossible data. A huge borrow figure would also hide top-borrower concentration.
+        out.append(Check("top_borrower", UNKNOWN, "borrow is above supply, which is impossible"))
     elif top_borrower_assets is None:
         out.append(Check("top_borrower", UNKNOWN, "positions unavailable"))
     elif borrow == 0:
@@ -110,6 +115,8 @@ def run_checks(market: dict, cfg: dict, *, top_borrower_assets: int | None,
     elif top_borrower_assets <= 0:
         # The market reports borrows but the positions query returned none: missing data.
         out.append(Check("top_borrower", UNKNOWN, "market has borrows but no positions were returned"))
+    elif top_borrower_assets > borrow:
+        out.append(Check("top_borrower", UNKNOWN, "one position borrows more than the whole market, which is impossible"))
     else:
         out.append(Check("top_borrower", *_band(top_borrower_assets / borrow, cfg["BORROWER_WARN"], cfg["BORROWER_EXIT"], "{:.1%}")))
 
@@ -142,9 +149,11 @@ def run_checks(market: dict, cfg: dict, *, top_borrower_assets: int | None,
         status, d = _band(bps, cfg["WST_WARN_BPS"], cfg["WST_EXIT_BPS"], "{:.0f} bps")
         out.append(Check("wsteth_rate", status, f"market {mkt:.5f} vs on-chain {steth_per_wsteth:.5f} stETH/wstETH: {d}"))
 
-    liq, supply = _nonneg_int(st.get("liquidityAssets")), _nonneg_int(st.get("supplyAssets"))
+    liq = _nonneg_int(st.get("liquidityAssets"))
     if liq is None or supply is None:
         out.append(Check("exit_liquidity", UNKNOWN, "liquidity or supply missing or invalid"))
+    elif borrow is not None and borrow > supply:
+        out.append(Check("exit_liquidity", UNKNOWN, "borrow is above supply, which is impossible"))
     elif liq > supply:
         out.append(Check("exit_liquidity", UNKNOWN, "liquidity is above supply, which is impossible"))
     else:

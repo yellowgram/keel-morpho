@@ -20,7 +20,10 @@ First versioned release. The scripts were rebuilt as the `keel` package
   with borrows, or a missing LLTV. Each is now `UNKNOWN` (or ineligible, for LLTV),
   and zero or non-numeric prices no longer crash a run. A missing or broken
   `borrowAssets`, a negative or broken `supplyAssets`/`liquidityAssets`, and
-  liquidity above supply are `UNKNOWN` too (NaN liquidity used to crash the run). A NaN policy value or a
+  liquidity above supply are `UNKNOWN` too (NaN liquidity used to crash the run). So are borrow above
+  supply (it used to pass every check and hide top-borrower concentration), a top position larger than
+  the market's borrow, and amounts that are not plain ASCII digits (`"²"` used to crash the run; `"5 "` and
+  other scripts' digits were accepted). A NaN policy value or a
   NaN, infinite or non-positive allowlist `cap_rel` is refused.
 - A market whose collateral token was merely *named* wstETH could pass the
   collateral filter. Collateral and loan asset are now matched by contract

@@ -55,7 +55,7 @@ one; unset it in the shell that runs Keel. If a matching name is not a wallet ke
    `UNKNOWN` (data missing). A market is *ready* only if it is eligible and all six
    are `PASS`; missing data never counts as a pass. Broken data is treated as
    missing: a NaN or negative reading, a missing or non-integer `borrowAssets`,
-   `supplyAssets` or `liquidityAssets`, liquidity above supply, a zero or
+   `supplyAssets` or `liquidityAssets` (amounts must be plain ASCII digits), liquidity or borrow above supply, one position borrowing more than the whole market, a zero or
    non-numeric price, a price timestamp more than 60 s in the future, or a market
    that reports borrows while the positions query returns none is `UNKNOWN`. A missing or invalid LLTV makes
    the market ineligible.

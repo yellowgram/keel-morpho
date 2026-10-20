@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any
 
 from . import __version__
+from .checks import _nonneg_int
 
 # Some public endpoints reject urllib's default User-Agent with 403.
 HEADERS = {"User-Agent": f"keel/{__version__} (+https://github.com/yellowgram/keel-morpho)"}
@@ -114,7 +115,13 @@ class LiveSources:
         rows = ((data.get("marketPositions") or {}).get("items")) or []
         if not rows:
             return 0, None
-        return int((rows[0].get("state") or {}).get("borrowAssets") or 0), None
+        raw = (rows[0].get("state") or {}).get("borrowAssets")
+        if raw is None:
+            return 0, None
+        amount = _nonneg_int(raw)
+        if amount is None:
+            return None, "top borrower borrowAssets invalid"
+        return amount, None
 
     def prices(self) -> tuple[dict | None, str | None]:
         """USD prices for wstETH, WETH and stETH with their timestamps."""
