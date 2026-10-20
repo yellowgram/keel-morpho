@@ -66,6 +66,27 @@ class MissingDataIsNotPass(unittest.TestCase):
             self.assertIn("LLTV is missing or invalid", checks.ineligible_reasons(m, cfg()), bad)
         self.assertEqual(checks.ineligible_reasons(market("a"), cfg()), [])
 
+    # LaunchGate re-review RR-K1..K4 (probes_partA/keel/test_lgrr.py), asserted as UNKNOWN.
+    def test_missing_or_broken_borrow_assets_is_unknown(self):
+        for bad in (None, "", "abc", -5, "-5", float("nan"), True):
+            m = market("a"); m["state"]["borrowAssets"] = bad
+            self.assertEqual(by(run_market(m))["top_borrower"], "UNKNOWN", bad)
+        m = market("a"); del m["state"]["borrowAssets"]
+        self.assertEqual(by(run_market(m))["top_borrower"], "UNKNOWN")
+
+    def test_negative_supply_is_unknown(self):
+        m = market("a"); m["state"]["supplyAssets"] = str(-10**24); m["state"]["liquidityAssets"] = str(10**23)
+        self.assertEqual(by(run_market(m))["exit_liquidity"], "UNKNOWN")
+
+    def test_liquidity_above_supply_is_unknown(self):
+        m = market("a"); m["state"]["supplyAssets"] = "1"; m["state"]["liquidityAssets"] = str(10**24)
+        self.assertEqual(by(run_market(m))["exit_liquidity"], "UNKNOWN")
+
+    def test_nan_liquidity_is_unknown_not_a_crash(self):
+        for bad in (float("nan"), float("inf"), "1e30", "x", "-1", -1):
+            m = market("a"); m["state"]["liquidityAssets"] = bad
+            self.assertEqual(by(run_market(m))["exit_liquidity"], "UNKNOWN", bad)
+
     def test_unknown_blocks_readiness(self):
         cs = run_market(market("a", utilization=float("nan")))
         self.assertFalse(checks.market_ready(True, cs))

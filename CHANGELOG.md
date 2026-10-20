@@ -18,7 +18,9 @@ First versioned release. The scripts were rebuilt as the `keel` package
 - Broken data could pass as good data: a NaN or negative utilization or oracle
   reading, a price timestamp in the future, an empty positions list on a market
   with borrows, or a missing LLTV. Each is now `UNKNOWN` (or ineligible, for LLTV),
-  and zero or non-numeric prices no longer crash a run. A NaN policy value or a
+  and zero or non-numeric prices no longer crash a run. A missing or broken
+  `borrowAssets`, a negative or broken `supplyAssets`/`liquidityAssets`, and
+  liquidity above supply are `UNKNOWN` too (NaN liquidity used to crash the run). A NaN policy value or a
   NaN, infinite or non-positive allowlist `cap_rel` is refused.
 - A market whose collateral token was merely *named* wstETH could pass the
   collateral filter. Collateral and loan asset are now matched by contract

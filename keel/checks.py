@@ -80,6 +80,19 @@ def _band(value: float, warn: float, exit_: float, fmt: str) -> tuple[str, str]:
     return PASS, s
 
 
+def _nonneg_int(v) -> int | None:
+    """A non-negative integer amount (int or decimal string), or None if missing or broken."""
+    if isinstance(v, bool) or v is None:
+        return None
+    if isinstance(v, int):
+        return v if v >= 0 else None
+    if isinstance(v, float):
+        return int(v) if math.isfinite(v) and v >= 0 and v == int(v) else None
+    if isinstance(v, str) and v.strip().isdigit():
+        return int(v.strip())
+    return None
+
+
 def run_checks(market: dict, cfg: dict, *, top_borrower_assets: int | None,
                oracle_price: float | None, prices: dict | None,
                steth_per_wsteth: float | None, now_ts: int) -> list[Check]:
@@ -87,8 +100,10 @@ def run_checks(market: dict, cfg: dict, *, top_borrower_assets: int | None,
     loan_dec = int((market.get("loanAsset") or {}).get("decimals") or 18)
     out: list[Check] = []
 
-    borrow = int(st.get("borrowAssets") or 0)
-    if top_borrower_assets is None:
+    borrow = _nonneg_int(st.get("borrowAssets"))
+    if borrow is None:
+        out.append(Check("top_borrower", UNKNOWN, "borrowAssets missing or invalid"))
+    elif top_borrower_assets is None:
         out.append(Check("top_borrower", UNKNOWN, "positions unavailable"))
     elif borrow == 0:
         out.append(Check("top_borrower", PASS, "no borrowers"))
@@ -127,11 +142,13 @@ def run_checks(market: dict, cfg: dict, *, top_borrower_assets: int | None,
         status, d = _band(bps, cfg["WST_WARN_BPS"], cfg["WST_EXIT_BPS"], "{:.0f} bps")
         out.append(Check("wsteth_rate", status, f"market {mkt:.5f} vs on-chain {steth_per_wsteth:.5f} stETH/wstETH: {d}"))
 
-    liq, supply = st.get("liquidityAssets"), st.get("supplyAssets")
+    liq, supply = _nonneg_int(st.get("liquidityAssets")), _nonneg_int(st.get("supplyAssets"))
     if liq is None or supply is None:
-        out.append(Check("exit_liquidity", UNKNOWN, "liquidity unavailable"))
+        out.append(Check("exit_liquidity", UNKNOWN, "liquidity or supply missing or invalid"))
+    elif liq > supply:
+        out.append(Check("exit_liquidity", UNKNOWN, "liquidity is above supply, which is impossible"))
     else:
-        liq_w, sup_w = int(liq) / 10 ** loan_dec, int(supply) / 10 ** loan_dec
+        liq_w, sup_w = liq / 10 ** loan_dec, supply / 10 ** loan_dec
         need = max(cfg["EXIT_LIQ_PCT"] * sup_w, cfg["EXIT_LIQ_FLOOR_WETH"])
         status = PASS if liq_w >= need else WARN
         out.append(Check("exit_liquidity", status, f"{liq_w:,.1f} WETH idle, need {need:,.1f}"))
