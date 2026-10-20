@@ -5,11 +5,15 @@ it is eligible and every check is PASS. UNKNOWN (missing data) is never PASS.
 """
 from __future__ import annotations
 
+import math
 import re
 from dataclasses import dataclass
 from typing import Any
 
 PASS, WARN, EXIT, UNKNOWN = "PASS", "WARN", "EXIT", "UNKNOWN"
+
+# Clock skew tolerated on price timestamps before they count as broken.
+FUTURE_SKEW_S = 60
 
 CHECK_NAMES = (
     "top_borrower",
@@ -48,13 +52,26 @@ def ineligible_reasons(market: dict, cfg: dict) -> list[str]:
         reasons.append(f"collateral {_sym(coll.get('symbol'))} at {_addr(coll.get('address'))} is not the wstETH contract")
     if (loan.get("address") or "").lower() != cfg["VAULT_ASSET"].lower():
         reasons.append(f"loan asset {_sym(loan.get('symbol'))} is not WETH")
-    lltv = int(market.get("lltv") or 0)
-    if lltv > int(cfg["MAX_LLTV_WAD"]):
+    try:
+        lltv = int(str(market.get("lltv")))
+    except (TypeError, ValueError):
+        lltv = None
+    if lltv is None or lltv <= 0 or lltv >= 10**18:
+        # Missing or nonsense LLTV is not "low enough": fail the filter.
+        reasons.append("LLTV is missing or invalid")
+    elif lltv > int(cfg["MAX_LLTV_WAD"]):
         reasons.append(f"LLTV {lltv / 1e16:.1f}% is above {int(cfg['MAX_LLTV_WAD']) / 1e16:.1f}%")
     return reasons
 
 
+def _finite_pos(v) -> bool:
+    return isinstance(v, (int, float)) and not isinstance(v, bool) and math.isfinite(v) and v > 0
+
+
 def _band(value: float, warn: float, exit_: float, fmt: str) -> tuple[str, str]:
+    # NaN or a negative reading is broken data, never a pass (json.loads accepts NaN).
+    if not isinstance(value, (int, float)) or not math.isfinite(value) or value < 0:
+        return UNKNOWN, f"invalid value {value!r}"
     s = fmt.format(value)
     if value > exit_:
         return EXIT, f"{s} > exit {fmt.format(exit_)}"
@@ -75,26 +92,34 @@ def run_checks(market: dict, cfg: dict, *, top_borrower_assets: int | None,
         out.append(Check("top_borrower", UNKNOWN, "positions unavailable"))
     elif borrow == 0:
         out.append(Check("top_borrower", PASS, "no borrowers"))
+    elif top_borrower_assets <= 0:
+        # The market reports borrows but the positions query returned none: missing data.
+        out.append(Check("top_borrower", UNKNOWN, "market has borrows but no positions were returned"))
     else:
         out.append(Check("top_borrower", *_band(top_borrower_assets / borrow, cfg["BORROWER_WARN"], cfg["BORROWER_EXIT"], "{:.1%}")))
 
     util = st.get("utilization")
+    try:
+        util = None if util is None else float(util)
+    except (TypeError, ValueError):
+        util = float("nan")
     if util is None:
         out.append(Check("utilization", UNKNOWN, "utilization unavailable"))
     else:
-        out.append(Check("utilization", *_band(float(util), cfg["UTIL_WARN"], cfg["UTIL_EXIT"], "{:.1%}")))
+        out.append(Check("utilization", *_band(util, cfg["UTIL_WARN"], cfg["UTIL_EXIT"], "{:.1%}")))
 
+    prices_ok = bool(prices) and all(_finite_pos((prices.get(k) or {}).get("usd")) for k in ("WSTETH", "VAULT_ASSET", "STETH"))
     market_px = None
-    if prices:
+    if prices_ok:
         market_px = prices["WSTETH"]["usd"] / prices["VAULT_ASSET"]["usd"]
-    if oracle_price is None or market_px is None:
+    if not _finite_pos(oracle_price) or market_px is None:
         out.append(Check("oracle_deviation", UNKNOWN, "oracle or market price unavailable"))
     else:
         bps = abs(oracle_price - market_px) / market_px * 1e4
         status, d = _band(bps, cfg["ORACLE_WARN_BPS"], cfg["ORACLE_EXIT_BPS"], "{:.0f} bps")
         out.append(Check("oracle_deviation", status, f"oracle {oracle_price:.5f} vs market {market_px:.5f} WETH/wstETH: {d}"))
 
-    if steth_per_wsteth is None or not prices:
+    if not _finite_pos(steth_per_wsteth) or not prices_ok:
         out.append(Check("wsteth_rate", UNKNOWN, "stEthPerToken or prices unavailable"))
     else:
         mkt = prices["WSTETH"]["usd"] / prices["STETH"]["usd"]
@@ -113,10 +138,17 @@ def run_checks(market: dict, cfg: dict, *, top_borrower_assets: int | None,
 
     # Price data age. (Morpho's state timestamp is the market's last interaction,
     # which is old for quiet markets and says nothing about data quality.)
-    if not prices:
+    stamps = []
+    for v in (prices or {}).values():
+        ts = (v or {}).get("ts") if isinstance(v, dict) else None
+        stamps.append(ts if isinstance(ts, (int, float)) and not isinstance(ts, bool) and math.isfinite(ts) else None)
+    if not stamps or None in stamps:
         out.append(Check("freshness", UNKNOWN, "no price timestamps"))
+    elif max(stamps) > now_ts + FUTURE_SKEW_S:
+        # A timestamp from the future is broken data, not a fresh price.
+        out.append(Check("freshness", UNKNOWN, f"price timestamp {int(max(stamps)) - now_ts}s in the future"))
     else:
-        age = max(0, now_ts - min(int(v["ts"]) for v in prices.values()))
+        age = max(0, now_ts - int(min(stamps)))
         out.append(Check("freshness", PASS if age <= cfg["STALE_S"] else WARN,
                          f"prices {age}s old (limit {cfg['STALE_S']}s)"))
     return out

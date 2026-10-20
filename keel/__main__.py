@@ -45,7 +45,8 @@ def cmd_observe(a: argparse.Namespace) -> int:
     bad = forbidden_key_env()
     if bad:
         _err("refusing to run: signing-key environment variables are set (" + ", ".join(bad) +
-             "). Keel never needs a key; unset them.")
+             "). Keel never needs a key; unset them. If one is not a wallet key (for example a CI "
+             "app key), name it in KEEL_NOT_SIGNING_KEYS=NAME[,NAME].")
         return EXIT_CONFIG
     for w in warnings:
         _err("warning: " + w)

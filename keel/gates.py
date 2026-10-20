@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import math
 import os
 from dataclasses import dataclass
 from datetime import datetime, timedelta
@@ -29,10 +30,17 @@ class AllowRow:
     reject_reason: str = ""
 
 
+# Exact variable names the operator says are not wallet keys (comma list), e.g. a CI
+# job's GITHUB_APP_PRIVATE_KEY. Names only; there is no "allow all".
+KEY_ENV_OVERRIDE = "KEEL_NOT_SIGNING_KEYS"
+
+
 def forbidden_key_env(environ: dict | None = None) -> list[str]:
     env = os.environ if environ is None else environ
+    waived = {n.strip() for n in str(env.get(KEY_ENV_OVERRIDE) or "").split(",") if n.strip()}
     return sorted(k for k, v in env.items()
-                  if v and str(v).strip() and any(s in k.upper() for s in FORBIDDEN_KEY_ENV_SUBSTR))
+                  if k not in waived and v and str(v).strip()
+                  and any(s in k.upper() for s in FORBIDDEN_KEY_ENV_SUBSTR))
 
 
 def parse_allow_line(line: str) -> AllowRow | None:
@@ -47,6 +55,8 @@ def parse_allow_line(line: str) -> AllowRow | None:
         cap_rel = float(parts[6])
     except ValueError:
         return AllowRow(raw=s, market_id=parts[2], reject_reason="lltv_wad or cap_rel is not a number")
+    if not math.isfinite(cap_rel) or cap_rel <= 0:
+        return AllowRow(raw=s, market_id=parts[2], reject_reason="cap_rel must be a finite number above 0")
     return AllowRow(raw=s, date=parts[1], market_id=parts[2], lltv_wad=lltv, collateral=parts[4],
                     oracle=parts[5], cap_rel=cap_rel, why="|".join(parts[7:]))
 

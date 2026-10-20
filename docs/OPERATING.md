@@ -16,7 +16,7 @@
 3. **`EXIT_PRIORITY`.** `DEMO_ONLY` is true but you report an open position. Reduce exposure first, then fix the config so it matches reality.
 4. **Any `EXIT` on a market you are in.** Keel has set `KILL`. Decide whether to withdraw. Clear `KILL` only once you understand the cause.
 5. **`UNKNOWN` checks.** Data for that check was missing. The market is not ready. Repeated `UNKNOWN` on `oracle_deviation` or `wsteth_rate` usually means the RPC endpoints are failing; set your own in `RPC_URLS`.
-6. **`freshness` WARN.** DefiLlama's wstETH price often updates every 10–20 minutes, so this can WARN near the 900 s limit. Re-run, or consciously raise `STALE_S` and re-pin the policy.
+6. **`freshness` WARN.** DefiLlama's wstETH and stETH prices update about every 15–17 minutes (sampled 925–986 s old on 2026-10-19; WETH 46–87 s). With the example `STALE_S` of 900 s, `freshness` therefore WARNs on most runs and the allocate recommendation is usually unreachable. That is deliberate in the example; if you accept older prices, raise `STALE_S` (about 1800 s covers two update intervals), then re-pin the policy. A timestamp more than 60 s in the future is `UNKNOWN`.
 7. **`IDLE_ALL` with no eligible markets.** This is the normal result. Loosening `MAX_LLTV_WAD` to get an eligible market is a policy decision about how much risk you accept, not a fix.
 8. **Rejected allowlist lines.** The report gives the reason. Common causes: a market's oracle changed or the id was mistyped.
 

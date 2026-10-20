@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 from pathlib import Path
 from typing import Any
 
@@ -78,8 +79,9 @@ def load_config(path: Path) -> tuple[dict[str, Any], list[str]]:
         if k in ("VAULT_ASSET", "WSTETH", "STETH"):
             if not (isinstance(cfg[k], str) and len(cfg[k]) == 42 and cfg[k].startswith("0x")):
                 raise ConfigError(f"{k} must be a 0x address")
-        elif isinstance(cfg[k], bool) or not isinstance(cfg[k], (int, float)) or cfg[k] < 0:
-            raise ConfigError(f"{k} must be a non-negative number")
+        elif (isinstance(cfg[k], bool) or not isinstance(cfg[k], (int, float))
+              or not math.isfinite(cfg[k]) or cfg[k] < 0):
+            raise ConfigError(f"{k} must be a finite non-negative number")
     for warn, exit_ in (("BORROWER_WARN", "BORROWER_EXIT"), ("UTIL_WARN", "UTIL_EXIT"),
                         ("ORACLE_WARN_BPS", "ORACLE_EXIT_BPS"), ("WST_WARN_BPS", "WST_EXIT_BPS")):
         if cfg[warn] > cfg[exit_]:

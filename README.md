@@ -39,7 +39,9 @@ python3 -m unittest
 
 Keel refuses to start if any environment variable whose name looks like signing
 material (`PRIVATE_KEY`, `MNEMONIC`, `SEED_PHRASE`, ...) is set. It never needs
-one; unset it in the shell that runs Keel.
+one; unset it in the shell that runs Keel. If a matching name is not a wallet key
+(for example a CI job's `GITHUB_APP_PRIVATE_KEY`), name it exactly in
+`KEEL_NOT_SIGNING_KEYS=NAME[,NAME]`; there is no wildcard.
 
 ## What Keel does on each run
 
@@ -51,7 +53,11 @@ one; unset it in the shell that runs Keel.
    `MAX_LLTV_WAD` (default 86%).
 3. **Check.** Every market gets six checks. Each is `PASS`, `WARN`, `EXIT`, or
    `UNKNOWN` (data missing). A market is *ready* only if it is eligible and all six
-   are `PASS`; missing data never counts as a pass.
+   are `PASS`; missing data never counts as a pass. Broken data is treated as
+   missing: a NaN or negative reading, a zero or non-numeric price, a price
+   timestamp more than 60 s in the future, or a market that reports borrows while
+   the positions query returns none is `UNKNOWN`. A missing or invalid LLTV makes
+   the market ineligible.
 
    | Check | What it measures | Default WARN / EXIT |
    |---|---|---|
@@ -60,7 +66,7 @@ one; unset it in the shell that runs Keel.
    | `oracle_deviation` | Market oracle's wstETH→WETH price vs DefiLlama spot prices | above 100 / 150 bps |
    | `wsteth_rate` | DefiLlama wstETH/stETH price vs the on-chain `stEthPerToken()` rate (depeg) | above 80 / 150 bps |
    | `exit_liquidity` | Unborrowed WETH vs max(10% of supply, 50 WETH): could you withdraw? | WARN only |
-   | `freshness` | Age of the oldest price used | WARN above 900 s |
+   | `freshness` | Age of the oldest price used | WARN above 900 s. DefiLlama's wstETH/stETH prices update about every 15–17 min, so this WARNs on most runs; see [OPERATING](docs/OPERATING.md) |
 
 4. **Compare with your allowlist.** You list markets you have reviewed, one line
    each (format below). Keel rejects a line unless the market id, LLTV and oracle
@@ -155,7 +161,8 @@ Keel is a second pair of eyes, not a risk engine. Know what it does not cover:
 - **It cannot stop you.** `KILL` and `DEMO_ONLY` change what Keel recommends; they
   do not block a transaction you sign elsewhere.
 - **Key-variable refusal is by name.** It catches common names, not a key stored
-  under an innocuous name or in a file.
+  under an innocuous name or in a file. `KEEL_NOT_SIGNING_KEYS` waives exact names
+  you vouch for.
 
 ## License
 
