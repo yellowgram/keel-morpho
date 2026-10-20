@@ -20,7 +20,7 @@
   "WST_EXIT_BPS": 150,
   "EXIT_LIQ_PCT": 0.10,
   "EXIT_LIQ_FLOOR_WETH": 50,
-  "STALE_S": 900,
+  "STALE_S": 2100,
   "POLICY_SHA256": null,
 
   "GRAPHQL": "https://api.morpho.org/graphql",

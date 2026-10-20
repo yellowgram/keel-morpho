@@ -67,7 +67,7 @@ one; unset it in the shell that runs Keel. If a matching name is not a wallet ke
    | `oracle_deviation` | Market oracle's wstETH→WETH price vs DefiLlama spot prices | above 100 / 150 bps |
    | `wsteth_rate` | DefiLlama wstETH/stETH price vs the on-chain `stEthPerToken()` rate (depeg) | above 80 / 150 bps |
    | `exit_liquidity` | Unborrowed WETH vs max(10% of supply, 50 WETH): could you withdraw? | WARN only |
-   | `freshness` | Age of the oldest price used | WARN above 900 s. DefiLlama's wstETH/stETH prices update about every 15–17 min, so this WARNs on most runs; see [OPERATING](docs/OPERATING.md) |
+   | `freshness` | Age of the oldest price used | WARN above 2100 s (35 min). DefiLlama stores a wstETH/stETH price about every 1800 s and serves it 90–150 s later, so an on-schedule price is up to about 1,950 s old; a WARN means the feed missed an update; see [OPERATING](docs/OPERATING.md) |
 
 4. **Compare with your allowlist.** You list markets you have reviewed, one line
    each (format below). Keel rejects a line unless the market id, LLTV and oracle

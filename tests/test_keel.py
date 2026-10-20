@@ -20,6 +20,9 @@ from keel.config import ConfigError, check_policy_pin, load_config, policy_finge
 ROOT = Path(__file__).resolve().parent.parent
 EX = ROOT / "examples"
 NOW = datetime(2026, 10, 19, 14, 0, tzinfo=timezone.utc)
+EXAMPLE_FINGERPRINT = "a142f4953aa0447aaecb4ed52248bd86b91cb4a4561a3ec95b22c01524319dbb"  # STALE_S 2100
+FINGERPRINT_1800 = "14a87fef4cc524204f9483f6e7474f439eb6067015fb2e01a2472adae41131eb"    # STALE_S 1800 (first R4 proposal, never released)
+FINGERPRINT_0_2_0 = "95af7dfcdbfaa3d5a2c8f6d0ebb836ff8d99e5124462666806035c714ad0f4a2"    # STALE_S 900
 CLEAN_ENV = {k: v for k, v in os.environ.items() if not any(s in k.upper() for s in gates.FORBIDDEN_KEY_ENV_SUBSTR)}
 
 
@@ -113,8 +116,32 @@ class Checks(unittest.TestCase):
 
     def test_freshness_uses_oldest_price(self):
         px = copy.deepcopy(fixture()["prices"])
-        px["STETH"]["ts"] = int(NOW.timestamp()) - 901
+        px["STETH"]["ts"] = int(NOW.timestamp()) - (cfg()["STALE_S"] + 1)
         self.assertEqual(by(run_market(market("a"), prices=px))["freshness"], "WARN")
+
+    def _fresh(self, age):
+        px = copy.deepcopy(fixture()["prices"])
+        for v in px.values():
+            v["ts"] = int(NOW.timestamp()) - age
+        return run_market(market("a"), prices=px)
+
+    def test_freshness_boundary_and_measured_cadence(self):  # STALE_S 2100 (0.2.1)
+        # DefiLlama stores wstETH/stETH about every 1800 s and serves it 90-150 s later:
+        # an on-schedule price is 90 s (just published) up to ~1950 s old (1901 s measured).
+        for age in (90, 1790, 1901, 1950):
+            self.assertEqual(by(self._fresh(age))["freshness"], "PASS", age)
+        self.assertEqual(by(self._fresh(2100))["freshness"], "PASS")   # the limit itself is fresh
+        self.assertEqual(by(self._fresh(2101))["freshness"], "WARN")   # one second over is not
+        # A missed update (measured stETH gap 2469 s + publish lag) must WARN.
+        self.assertEqual(by(self._fresh(2469 + 150))["freshness"], "WARN")
+
+    def test_stale_price_warn_blocks_ready(self):  # K-R4-2: the property the STALE_S change relies on
+        fresh = self._fresh(300)
+        self.assertTrue(checks.market_ready(True, fresh), [(c.name, c.status) for c in fresh])
+        stale = self._fresh(cfg()["STALE_S"] + 1)
+        self.assertEqual(by(stale)["freshness"], "WARN")
+        self.assertEqual([c.name for c in stale if c.status != "PASS"], ["freshness"])  # nothing else fails
+        self.assertFalse(checks.market_ready(True, stale))
 
     def test_missing_data_is_unknown_and_never_ready(self):
         cs = run_market(market("a"), top_borrower_assets=None, oracle_price=None, prices=None, steth_per_wsteth=None)
@@ -236,6 +263,35 @@ class Config(unittest.TestCase):
             c, w = load_config(self.write(d, b))
             self.assertEqual(c["MAX_LLTV_WAD"], 860000000000000000)
             self.assertTrue(w)
+
+    def test_example_stale_s_and_fingerprint(self):  # 0.2.1 policy change
+        c = cfg()
+        self.assertEqual(c["STALE_S"], 2100)
+        self.assertEqual(policy_fingerprint(cfg(STALE_S=1800)), FINGERPRINT_1800)
+        # Pinned literal: a silent change to any policy value in the example must fail here.
+        self.assertEqual(policy_fingerprint(c), EXAMPLE_FINGERPRINT)
+        self.assertNotEqual(policy_fingerprint(cfg(STALE_S=900)), EXAMPLE_FINGERPRINT)
+        self.assertEqual(policy_fingerprint(cfg(STALE_S=900)), FINGERPRINT_0_2_0)
+
+    def test_docs_match_the_example_policy(self):
+        c = cfg()
+        fp = policy_fingerprint(c)
+        pack = (EX / "sample-pack.md").read_text()
+        self.assertIn(f"Policy fingerprint: `{fp}`", pack)
+        self.assertIn(f"(limit {c['STALE_S']}s)", pack)
+        self.assertNotIn("(limit 900s)", pack)
+        self.assertIn(f"WARN above {c['STALE_S']} s", (ROOT / "README.md").read_text())
+        self.assertIn(f"The example `STALE_S` is {c['STALE_S']} s", (ROOT / "docs" / "OPERATING.md").read_text())
+        changelog = (ROOT / "CHANGELOG.md").read_text()
+        self.assertIn(fp, changelog)
+        # K-R4-1: the rationale is the measured cadence (~1800 s + 90-150 s lag), not the 925-986 s samples.
+        latest = changelog.split("\n## ", 2)[1]
+        for text in (latest, (ROOT / "README.md").read_text(), (ROOT / "docs" / "OPERATING.md").read_text()):
+            self.assertIn("1800 s", text)
+            self.assertIn("90–150 s", text)
+            self.assertNotIn("925", text)
+        import keel
+        self.assertTrue(changelog.split("\n## ", 1)[1].startswith(keel.__version__ + " "))
 
     def test_policy_pin(self):
         c = cfg()
@@ -364,6 +420,20 @@ class CommandLine(unittest.TestCase):
         self.assertTrue(out.startswith("ALLOCATE_ELIGIBLE"), out)
         log = (self.d / "out" / "log.jsonl").read_text().splitlines()
         self.assertEqual(json.loads(log[-1])["allocatable"], ["0x" + "a" * 64])
+
+    def test_stale_prices_never_allocate(self):  # K-R4-2 end to end: same live-ready config, stale prices
+        self.edit(DEMO_ONLY=False, VAULT_ADDRESS="0x" + "12" * 20)
+        fx = fixture()
+        for v in fx["prices"].values():
+            v["ts"] = int(NOW.timestamp()) - (cfg()["STALE_S"] + 1)
+        (self.d / "stale.json").write_text(json.dumps(fx))
+        code, out, _ = self.run_cli("--fixture", str(self.d / "stale.json"))
+        self.assertEqual(code, 0)
+        self.assertFalse(out.startswith("ALLOCATE_ELIGIBLE"), out)
+        pack = (self.d / "out" / "pack.md").read_text()
+        self.assertNotIn("ALLOCATE_ELIGIBLE", pack)
+        self.assertIn("| freshness | WARN |", pack)
+        self.assertEqual(json.loads((self.d / "out" / "log.jsonl").read_text().splitlines()[-1])["allocatable"], [])
 
     def test_refuses_with_key_in_env(self):
         code, _, err = self.run_cli(env={**CLEAN_ENV, "DEPLOYER_PRIVATE_KEY": "secret-value"})

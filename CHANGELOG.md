@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.2.1 — 2026-10-20
+
+### Changed
+
+- `STALE_S` in `config.example.json` is now 2100 s (was 900 s). DefiLlama
+  stores a wstETH/stETH price about every 1800 s (measured 1793–1813 s) and
+  serves it 90–150 s later, so an on-schedule price is up to about 1,950 s old
+  (1,901 s measured just before an update appeared). With 900 s, `freshness`
+  WARNed on about half of all runs and a market could rarely become ready.
+  2100 s is the cadence plus the publish lag plus about 150 s of jitter: an
+  on-schedule run passes, and a missed update WARNs. It is a loosening: price
+  cross-checks may now use a price up to 35 minutes old. This is a policy
+  change: the example's policy fingerprint is now
+  `a142f4953aa0447aaecb4ed52248bd86b91cb4a4561a3ec95b22c01524319dbb`
+  (was `95af7dfc…`). An existing `config.json` keeps its own `STALE_S`; to adopt
+  the new value, set it to 2100 and update `POLICY_SHA256`
+  (`python3 -m keel fingerprint`).
+- `examples/sample-pack.md` regenerated (freshness limit and fingerprint).
+
 ## 0.2.0 — 2026-10-19
 
 First versioned release. The scripts were rebuilt as the `keel` package

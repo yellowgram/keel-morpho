@@ -29,7 +29,7 @@ Not eligible: LLTV 94.5% is above 86.0%.
 | oracle_deviation | PASS | oracle 1.24650 vs market 1.24511 WETH/wstETH: 11 bps |
 | wsteth_rate | PASS | market 1.24709 vs on-chain 1.24670 stETH/wstETH: 3 bps |
 | exit_liquidity | PASS | 4,800.0 WETH idle, need 4,000.0 |
-| freshness | PASS | prices 300s old (limit 900s) |
+| freshness | PASS | prices 300s old (limit 2100s) |
 
 ### `0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa`
 
@@ -40,7 +40,7 @@ Not eligible: LLTV 94.5% is above 86.0%.
 | oracle_deviation | PASS | oracle 1.24670 vs market 1.24511 WETH/wstETH: 13 bps |
 | wsteth_rate | PASS | market 1.24709 vs on-chain 1.24670 stETH/wstETH: 3 bps |
 | exit_liquidity | PASS | 4,560.0 WETH idle, need 1,200.0 |
-| freshness | PASS | prices 300s old (limit 900s) |
+| freshness | PASS | prices 300s old (limit 2100s) |
 
 ### `0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb`
 
@@ -53,7 +53,7 @@ Not eligible: collateral wstETH at 0xdededededededededededededededededededede is
 | oracle_deviation | PASS | oracle 1.24670 vs market 1.24511 WETH/wstETH: 13 bps |
 | wsteth_rate | PASS | market 1.24709 vs on-chain 1.24670 stETH/wstETH: 3 bps |
 | exit_liquidity | PASS | 1,800.0 WETH idle, need 300.0 |
-| freshness | PASS | prices 300s old (limit 900s) |
+| freshness | PASS | prices 300s old (limit 2100s) |
 
 ## Inputs
 
@@ -62,4 +62,4 @@ Not eligible: collateral wstETH at 0xdededededededededededededededededededede is
 - DEMO_ONLY: true · KILL: false · VAULT_ADDRESS: not set · OPEN_SIZE_WETH: 0.0
 - Allowlist: 1 accepted, 1 rejected
   - rejected `ALLOW \| 2026-10-19 \| 0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb`: market is not eligible: collateral wstETH at 0xdededededededededededededededededededede is not the wstETH contract
-- Policy fingerprint: `95af7dfcdbfaa3d5a2c8f6d0ebb836ff8d99e5124462666806035c714ad0f4a2`
+- Policy fingerprint: `a142f4953aa0447aaecb4ed52248bd86b91cb4a4561a3ec95b22c01524319dbb`
